@@ -1,6 +1,7 @@
-from rcsFunctions import *
-import numpy as np
+from reflectors import *
+from scene import *
 from scipy.stats import weibull_min
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -13,9 +14,31 @@ plt.plot(x, weibull_min.pdf(x, c),
 
 
 if __name__ == '__main__':
-    x = plate_rcs(4, 40, 10000)
-    print(x)
     rv = weibull_min.rvs(c, size=10)
     print(rv)
 
 
+plate1 = PlateReflector(4, 1.3, 1E8)
+cylinder1 = CylinderReflector(3, 3, 1E6)
+
+print(cylinder1.rcs())
+print(plate1.rcs())
+
+print(plate1.location)
+
+scene1 = Scene()
+scene1.add_reflector(plate1, 20)
+scene1.add_reflector(cylinder1, 50)
+scene1.print_reflectors()
+print(scene1.reflector_count)
+
+scene1.remove_reflector(plate1)
+scene1.print_reflectors()
+print(scene1.reflector_count)
+
+scene1.clear_all_reflectors()
+scene1.print_reflectors()
+
+scene2 = Scene()
+scene2.add_random_reflectors(5)
+scene2.print_reflectors()
