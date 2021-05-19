@@ -18,27 +18,12 @@ if __name__ == '__main__':
     print(rv)
 
 
-plate1 = PlateReflector(4, 1.3, 1E8)
-cylinder1 = CylinderReflector(3, 3, 1E6)
+scene3 = Scene()
+scene3.add_random_reflectors(5)
+theta = [-20, -10, 0, 10, 20]
+freq = [1E8, 2E8, 3E8]
+rcs = scene3.scene_rcs(theta, freq)
+print(rcs)
+scene3.print_reflectors()
 
-print(cylinder1.rcs())
-print(plate1.rcs())
 
-print(plate1.location)
-
-scene1 = Scene()
-scene1.add_reflector(plate1, 20)
-scene1.add_reflector(cylinder1, 50)
-scene1.print_reflectors()
-print(scene1.reflector_count)
-
-scene1.remove_reflector(plate1)
-scene1.print_reflectors()
-print(scene1.reflector_count)
-
-scene1.clear_all_reflectors()
-scene1.print_reflectors()
-
-scene2 = Scene()
-scene2.add_random_reflectors(5)
-scene2.print_reflectors()

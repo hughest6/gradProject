@@ -28,8 +28,18 @@ class Scene:
     def plot_scene(self):
         pass
 
-    def scene_rcs(self, start_loc, end_loc, step):
-        pass
+    def scene_rcs(self, thetas, frequencies):
+        freq_angle = []
+        for freq in frequencies:
+
+            power_angle = []
+            for theta in thetas:
+                power = 0
+                for ref in self.reflectors:
+                    power += ref.rcs(freq, theta)
+                power_angle.append(power)
+            freq_angle.append(power_angle)
+        return freq_angle
 
     def clear_all_reflectors(self):
         self.reflectors = []

@@ -13,13 +13,17 @@ class Reflector:
 
 class PlateReflector(Reflector):
 
-    def __init__(self, plate_area=0, theta=0, freq=0):
+    def __init__(self, plate_area=1, theta=1, freq=1):
         super().__init__("plate")
         self.plate_area = plate_area
         self.theta = theta
         self.freq = freq
 
-    def rcs(self):
+    def rcs(self, *args):
+        self.freq = args[0]
+        self.theta = args[1]
+        if self.theta == 0:
+            self.theta = 1E-12
         gamma = 3E8 / self.freq
         k = 2
         return (4 * pi * (self.plate_area ** 4)) / (gamma ** 2) * (
@@ -42,7 +46,8 @@ class CylinderReflector(Reflector):
         self.cyl_length = cyl_length
         self.freq = freq
 
-    def rcs(self):
+    def rcs(self, *args):
+        self.freq = args[0]
         gamma = 3E8 / self.freq
         return (2 * pi * self.cyl_area * (self.cyl_length ** 2)) / (gamma ** 2)
 
@@ -62,9 +67,10 @@ class TrihedralReflector(Reflector):
         self.area = area
         self.freq = freq
 
-    def rcs(self):
+    def rcs(self, *args):
+        self.freq = args[0]
         gamma = 3E8 / self.freq
-        return (4 * pi * (self.area ^ 4)) / (3 * (gamma ** 2))
+        return (4 * pi * (self.area**4)) / (3 * (gamma ** 2))
 
     def randomize(self):
         self.area = 1 + (random.random()*5)
