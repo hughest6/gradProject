@@ -1,9 +1,13 @@
 import random
+import numpy as np
 from reflectors import *
+from rcs_stats import *
 
 class Scene:
 
-    def __init__(self):
+    def __init__(self, frequencies, thetas):
+        self.frequencies = frequencies
+        self.thetas = thetas
         self.reflectors = []
         self.reflector_count = 0
         self.noise = 0
@@ -28,17 +32,18 @@ class Scene:
     def plot_scene(self):
         pass
 
-    def scene_rcs(self, thetas, frequencies):
+    def scene_rcs(self):
         freq_angle = []
-        for freq in frequencies:
+        for freq in self.frequencies:
 
             power_angle = []
-            for theta in thetas:
+            for theta in self.thetas:
                 power = 0
                 for ref in self.reflectors:
                     power += ref.rcs(freq, theta)
                 power_angle.append(power)
             freq_angle.append(power_angle)
+        freq_angle = np.transpose(freq_angle)
         return freq_angle
 
     def clear_all_reflectors(self):
@@ -65,3 +70,8 @@ class Scene:
                 ref = TrihedralReflector()
                 ref.randomize()
                 self.add_reflector(ref, loc)
+
+    def scene_statistics(self):
+        rcs = self.scene_rcs()
+        rcs_info = basic_stats(rcs)
+        return rcs_info
