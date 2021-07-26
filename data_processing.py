@@ -1,6 +1,5 @@
 from scene import *
 from reflectors import *
-from rcs_stats import *
 import pandas as pd
 from pandas import DataFrame
 import random

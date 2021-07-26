@@ -2,6 +2,8 @@ import random
 import numpy as np
 from reflectors import *
 from rcs_stats import *
+from sklearn.preprocessing import normalize
+
 
 class Scene:
 

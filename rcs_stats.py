@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import stats
+from sklearn.decomposition import PCA
 
 # Calculations for output RCS from given scene
 
@@ -7,6 +8,10 @@ from scipy import stats
 # Should be more sophisticated, for now, combine each freq and average
 # frequencies on x axis, thetas on y axis
 def dim_reduction(rcs):
+    #pca = PCA(n_components=5, svd_solver='full')
+    #pca.fit(rcs)
+    #return pca.singular_values_
+
     return np.mean(rcs, axis=1)
 
 

@@ -26,24 +26,32 @@ freq = [1E8, 2E8, 3E8]
 theta = [-20, -10, 0, 10, 20]
 
 scene3 = Scene(freqs, theta)
-scene3.add_random_reflectors(5)
+scene3.add_random_reflectors(1)
+scene3.scene_statistics()
+scene3.print_reflectors()
 
-d = DataHandler.generate_table(500, 1, 6, freqs, theta)
-DataHandler.write_file(d, 'testfile')
+#d = DataHandler.generate_table(5000, 1, 6, freq, theta)
+#DataHandler.write_file(d, 'testfile')
 
-file_loc = r'C:\Users\tyler\PycharmProjects\gradProject\gradProject\Data\\'
+file_data = r'C:\Users\tyler\PycharmProjects\gradProject\gradProject\Data\\'
 filetype = '.csv'
-file_loc = file_loc + 'testfile' + filetype
+file_loc = file_data + 'testfile' + filetype
 prepped = data_prep(file_loc)
-tree_reg = train_dec_regressor(prepped[0], prepped[1])
-clftod = train_tree(prepped[0], prepped[1])
-y_predict = clftod.predict(prepped[2])
 
-correct, wrong = count_predictions(prepped[3], y_predict)
-print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct,round(100*correct/(correct+wrong),2),wrong))
+#kmeans_cluster(prepped[0])
+#tup_size = [5,5]
+#print(random.weibull(1, tup_size))
+#print(random.rayleigh(1, tup_size))
+#print(random.normal(0,1,tup_size))
 
-kmeans_cluster(prepped[0])
-tup_size = [5,5]
-print(random.weibull(1, tup_size))
-print(random.rayleigh(1, tup_size))
-print(random.normal(0,1,tup_size))
+standard_tree = train_tree(prepped[0], prepped[1])
+loc = file_data+'decision_tree_conf_matrix.png'
+forrest = random_forest(prepped[0], prepped[1])
+extra_t = extra_trees(prepped[0], prepped[1])
+predictor(standard_tree, prepped[2], prepped[3])
+predictor(forrest, prepped[2], prepped[3])
+predictor(extra_t, prepped[2], prepped[3])
+
+#mlp = mlp_classifier(prepped[0], prepped[1])
+#predictor(mlp, prepped[2], prepped[3])
+
