@@ -35,7 +35,7 @@ scene3.print_reflectors()
 print(scene3.scene_statistics())
 
 t0 = time.time()
-d = DataHandler.generate_table(50, 1, 6, freq, theta)
+d = DataHandler.generate_table(5000, 1, 6, freq, theta)
 DataHandler.write_file(d, 'testfile')
 
 file_data = r'C:\Users\tyler\PycharmProjects\gradProject\gradProject\Data\\'
