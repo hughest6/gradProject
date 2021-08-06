@@ -34,7 +34,7 @@ class Scene:
     def plot_scene(self):
         pass
 
-    def scene_rcs(self):
+    def scene_rcs(self, add_noise=False):
         freq_angle = []
         for freq in self.frequencies:
 
@@ -46,6 +46,9 @@ class Scene:
                 power_angle.append(power)
             freq_angle.append(power_angle)
         freq_angle = np.transpose(freq_angle)
+        if add_noise:
+            freq_angle = self.add_noise(freq_angle, -30)
+        freq_angle = normalize(freq_angle, axis=0)
         return freq_angle
 
     def clear_all_reflectors(self):
@@ -74,6 +77,20 @@ class Scene:
                 self.add_reflector(ref, loc)
 
     def scene_statistics(self):
-        rcs = self.scene_rcs()
+        rcs = self.scene_rcs(True)
         rcs_info = basic_stats(rcs)
         return rcs_info
+
+    @staticmethod
+    def add_noise(signal, target_snr_db):
+        sig_avg_watts = np.mean(signal)
+        sig_avg_db = 10 * np.log10(sig_avg_watts)
+        # Calculate noise according to [2] then convert to watts
+        noise_avg_db = sig_avg_db - target_snr_db
+        noise_avg_watts = 10 ** (noise_avg_db / 10)
+        # Generate an sample of white noise
+        mean_noise = 0
+        noise_volts = np.random.normal(mean_noise, np.sqrt(noise_avg_watts), signal.shape)
+        # Noise up the original signal
+        return signal + noise_volts
+

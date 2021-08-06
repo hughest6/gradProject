@@ -64,7 +64,7 @@ class TrihedralReflector(Reflector):
         freq = args[0]
         theta = args[1]
         gamma = 3E8 / freq
-        return ((12*pi*self.area)**2)*(math.cos(theta)**2)*((gamma**2)/9e16)
+        return ((12*pi*self.area)**2)*(math.cos(theta)**2)*((gamma**2))
         #return (4 * pi * (self.area**4)) / (3 * (gamma ** 2))
 
     def randomize(self):

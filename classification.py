@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import plot_confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
+import os
 
 dct = {
         'trihedral_reflector': 0,
@@ -95,14 +96,17 @@ def extra_trees(X,y):
     return clf
 
 
-def predictor(net, test_x, test_y):
+def predictor(net, test_x, test_y, name):
     y_pred = net.predict(test_x)
     correct, wrong = count_predictions(test_y, y_pred)
     print(net.__class__)
     print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct,round(100*correct/(correct+wrong),2),wrong))
 
     disp = plot_confusion_matrix(net, test_x, test_y, display_labels=dct.keys(),cmap=plt.cm.Blues)
-    disp.ax_.set_title('Confusion Matrix')
+    disp.ax_.set_title('Confusion Matrix' + str(net.__class__) + '\n SNR: -30dB')
     print('Confusion Matrix')
     print(disp.confusion_matrix)
+    dirc = os.path.dirname(__file__)
+    filename = os.path.join(dirc, 'Data', name+'.jpg')
+    plt.savefig(filename, bbox_inches="tight")
     plt.show()
