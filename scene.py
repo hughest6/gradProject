@@ -7,13 +7,17 @@ from sklearn.preprocessing import normalize
 
 class Scene:
 
-    def __init__(self, frequencies, thetas):
+    def __init__(self, frequencies, thetas, snr=1):
         self.frequencies = frequencies
         self.thetas = thetas
         self.reflectors = []
         self.reflector_count = 0
         self.noise = 0
         self.clutter = 0
+        self.snr = snr
+
+    def set_snr(self, new_snr):
+        self.snr = new_snr
 
     def add_reflector(self, reflector, location):
         reflector.location = location
@@ -34,7 +38,7 @@ class Scene:
     def plot_scene(self):
         pass
 
-    def scene_rcs(self, add_noise=False):
+    def scene_rcs(self, add_noise=True):
         freq_angle = []
         for freq in self.frequencies:
 
@@ -47,7 +51,7 @@ class Scene:
             freq_angle.append(power_angle)
         freq_angle = np.transpose(freq_angle)
         if add_noise:
-            freq_angle = self.add_noise(freq_angle, -30)
+            freq_angle = self.add_noise(freq_angle, self.snr)
         freq_angle = normalize(freq_angle, axis=0)
         return freq_angle
 
