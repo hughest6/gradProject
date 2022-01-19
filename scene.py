@@ -50,8 +50,12 @@ class Scene:
                 power_angle.append(power)
             freq_angle.append(power_angle)
         freq_angle = np.transpose(freq_angle)
+        freq_angle = normalize(freq_angle, axis=0)
+        f_list = [item for sublist in freq_angle for item in sublist]
         if add_noise:
             freq_angle = self.add_noise(freq_angle, self.snr)
+        min_val = min(f_list)
+        freq_angle = freq_angle + abs(min_val)
         freq_angle = normalize(freq_angle, axis=0)
         return freq_angle
 
@@ -96,5 +100,6 @@ class Scene:
         mean_noise = 0
         noise_volts = np.random.normal(mean_noise, np.sqrt(noise_avg_watts), signal.shape)
         # Noise up the original signal
-        return signal + noise_volts
+        rt = signal + noise_volts
+        return rt
 

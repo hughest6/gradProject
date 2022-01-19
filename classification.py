@@ -106,7 +106,7 @@ def predictor(net, test_x, test_y, name):
     print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct,round(100*correct/(correct+wrong),2),wrong))
 
     disp = plot_confusion_matrix(net, test_x, test_y, display_labels=dct.keys(),cmap=plt.cm.Blues)
-    disp.ax_.set_title('Confusion Matrix' + str(net.__class__) + '\n SNR: -40dB')
+    disp.ax_.set_title('Confusion Matrix' + str(net.__class__) + '\n SNR: 0dB')
     print('Confusion Matrix')
     print(disp.confusion_matrix)
     dirc = os.path.dirname(__file__)
@@ -157,11 +157,40 @@ def t_flow(raw_data, num_freqs, num_thetas):
 
     model.compile(loss="categorical_crossentropy", optimizer="SGD", metrics=["accuracy"])
 
-    model.fit(x_train, y_train, epochs=5, batch_size=1)
+    model.fit(x_train, y_train, epochs=30, batch_size=1)
     y_pred = model.predict(x_test)
     print(tf.math.confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1), num_classes=3))
 
     return model
+
+
+def t_predict(model, raw_data):
+    train_set, test_set = train_test_split(raw_data, test_size=0.2, random_state=42)
+    print("test set size:")
+    print(len(test_set))
+    y_train = []
+    x_train = []
+    for obj in train_set:
+        y_train.append(obj[0] - 1)
+        x_train.append(obj[1])
+    y_test = []
+    x_test = []
+    for obj in test_set:
+        y_test.append(obj[0] - 1)
+        x_test.append(obj[1])
+
+    x_train = np.asarray(x_train)
+    y_train = np.asarray(y_train)
+    y_train = tf.keras.utils.to_categorical(y_train, num_classes=3)
+    x_test = np.asarray(x_test)
+    y_test = tf.keras.utils.to_categorical(y_test, num_classes=3)
+
+    y_pred = model.predict(x_test)
+    correct, wrong = count_predictions(np.argmax(y_pred, 1), np.argmax(y_test, 1))
+    print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct, round(
+        100 * correct / (correct + wrong), 2), wrong))
+
+    print(tf.math.confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1), num_classes=3))
 
 
 def model_probabilities(model, fa_trials, d_trials, true_ref, false_ref):

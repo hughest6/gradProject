@@ -11,12 +11,12 @@ class DataHandler:
         pass
 
     @staticmethod
-    def generate_table(entries, min_obj_size, max_obj_size, freqs, thetas):
+    def generate_table(entries, min_obj_size, max_obj_size, freqs, thetas, snr):
         df = pd.DataFrame(columns=[])
         raw_data = []
         reflector_type = 1
         for index in range(entries):
-            sc = Scene(freqs, thetas)
+            sc = Scene(freqs, thetas, snr)
             obj_size = random.uniform(min_obj_size, max_obj_size)
             loc = 0
             if reflector_type == 1:

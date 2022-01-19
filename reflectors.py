@@ -24,8 +24,9 @@ class PlateReflector(Reflector):
             theta = 1E-12
         gamma = 3E8 / freq
         k = 2
-        return (4 * pi * (self.plate_area ** 4)) / (gamma ** 2) * (
+        res = (4 * pi * (self.plate_area ** 4)) / (gamma ** 2) * (
                 (math.sin(k * self.plate_area * math.sin(theta))) / (k * self.plate_area * math.sin(theta)))
+        return abs(res)
 
     def randomize(self):
         self.plate_area = 1 + (random.random()*5)
