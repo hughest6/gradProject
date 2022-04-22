@@ -3,6 +3,8 @@ import numpy as np
 from reflectors import *
 from rcs_stats import *
 from sklearn.preprocessing import normalize
+#import matplotlib.pyplot as plt
+#from matplotlib import cm
 
 
 class Scene:
@@ -19,7 +21,7 @@ class Scene:
     def set_snr(self, new_snr):
         self.snr = new_snr
 
-    def add_reflector(self, reflector, location):
+    def add_reflector(self, reflector, location=0):
         reflector.location = location
         self.reflectors.append(reflector)
         self.reflector_count = self.reflector_count+1
@@ -31,14 +33,12 @@ class Scene:
     def print_reflectors(self):
         if not self.reflectors:
             print("empty")
+        print("shape: " + str(len(self.frequencies)) + " x " + str(len(self.thetas)))
         for reflector in self.reflectors:
             print(reflector.reflector_type + ": " + str(reflector.location))
             reflector.print_attributes()
 
-    def plot_scene(self):
-        pass
-
-    def scene_rcs(self, add_noise=True):
+    def scene_rcs(self, add_awgn_noise=True, add_clutter=False, clutter_factor=2):
         freq_angle = []
         for freq in self.frequencies:
 
@@ -52,12 +52,28 @@ class Scene:
         freq_angle = np.transpose(freq_angle)
         freq_angle = normalize(freq_angle, axis=0)
         f_list = [item for sublist in freq_angle for item in sublist]
-        if add_noise:
-            freq_angle = self.add_noise(freq_angle, self.snr)
+
+        awgn = 0
+        clutter = 0
+        if add_awgn_noise:
+            awgn = self.add_awgn_noise(freq_angle, self.snr)
+        if add_clutter:
+            clutter = self.add_weibull_noise(freq_angle, self.snr, a_param=clutter_factor)
         min_val = min(f_list)
+        freq_angle = freq_angle + awgn + clutter
         freq_angle = freq_angle + abs(min_val)
         freq_angle = normalize(freq_angle, axis=0)
         return freq_angle
+
+    # def plot_scene(self, add_noise=False):
+    #     rcs = self.scene_rcs(add_noise)
+    #     x, y = np.meshgrid(np.array(self.frequencies), np.array(self.thetas))
+    #     z = np.array(rcs)
+    #     z = z.reshape(x.shape)
+    #     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    #     surf = ax.plot_surface(x, y, z, cmap=cm.get_cmap('plasma'),
+    #                            linewidth=0, antialiased=False)
+    #     plt.show()
 
     def clear_all_reflectors(self):
         self.reflectors = []
@@ -90,7 +106,7 @@ class Scene:
         return rcs_info
 
     @staticmethod
-    def add_noise(signal, target_snr_db):
+    def add_awgn_noise(signal, target_snr_db):
         sig_avg_watts = np.mean(signal)
         sig_avg_db = 10 * np.log10(sig_avg_watts)
         # Calculate noise according to [2] then convert to watts
@@ -100,6 +116,20 @@ class Scene:
         mean_noise = 0
         noise_volts = np.random.normal(mean_noise, np.sqrt(noise_avg_watts), signal.shape)
         # Noise up the original signal
-        rt = signal + noise_volts
-        return rt
+        return noise_volts
+
+    @staticmethod
+    def add_weibull_noise(signal, target_snr_db, a_param=2):
+        sig_avg_watts = np.mean(signal)
+        sig_avg_db = 10 * np.log10(sig_avg_watts)
+        # Calculate noise according to [2] then convert to watts
+        noise_avg_db = sig_avg_db - target_snr_db
+        noise_avg_watts = 10 ** (noise_avg_db / 10)
+        # Generate an sample of weibull noise & find average power
+        noise_volts = np.random.weibull(a_param, signal.shape)
+        weibull_noise_power = np.mean(noise_volts)
+        power_factor = noise_avg_watts / weibull_noise_power
+        noise_volts = noise_volts * power_factor
+        # Noise up the original signal
+        return noise_volts
 

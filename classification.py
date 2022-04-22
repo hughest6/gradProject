@@ -13,6 +13,7 @@ from sklearn.ensemble import ExtraTreesClassifier
 import os
 import tensorflow as tf
 import numpy as np
+import xml.etree.ElementTree as ET
 
 
 dct = {
@@ -69,16 +70,16 @@ def train_tree(X, y):
     return clftod
 
 
-def kmeans_cluster(X):
-    kmeans = KMeans(n_clusters=3).fit(X)
-    kmeans_y = kmeans.predict(X)
-
-    plt.scatter(X[:, 0], X[:, 1], c=kmeans_y)
-    plt.title('Target Clustering Data')
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
-    #plt.show()
-    print(silhouette_score(X, kmeans_y))
+# def kmeans_cluster(X):
+#     kmeans = KMeans(n_clusters=3).fit(X)
+#     kmeans_y = kmeans.predict(X)
+#
+#     plt.scatter(X[:, 0], X[:, 1], c=kmeans_y)
+#     plt.title('Target Clustering Data')
+#     plt.xlabel('Component 1')
+#     plt.ylabel('Component 2')
+#     #plt.show()
+#     print(silhouette_score(X, kmeans_y))
 
 
 def mlp_classifier(X, y):
@@ -99,23 +100,25 @@ def extra_trees(X,y):
     return clf
 
 
-def predictor(net, test_x, test_y, name):
-    y_pred = net.predict(test_x)
-    correct, wrong = count_predictions(test_y, y_pred)
-    print(net.__class__)
-    print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct,round(100*correct/(correct+wrong),2),wrong))
-
-    disp = plot_confusion_matrix(net, test_x, test_y, display_labels=dct.keys(),cmap=plt.cm.Blues)
-    disp.ax_.set_title('Confusion Matrix' + str(net.__class__) + '\n SNR: 0dB')
-    print('Confusion Matrix')
-    print(disp.confusion_matrix)
-    dirc = os.path.dirname(__file__)
-    filename = os.path.join(dirc, 'Data', name+'.jpg')
-    plt.savefig(filename, bbox_inches="tight")
-    plt.show()
+# def predictor(net, test_x, test_y, name):
+#     y_pred = net.predict(test_x)
+#     correct, wrong = count_predictions(test_y, y_pred)
+#     print(net.__class__)
+#     print("We obtained {} correct ({}%) predictions against {} wrong one".format(correct,round(100*correct/(correct+wrong),2),wrong))
+#
+#     disp = plot_confusion_matrix(net, test_x, test_y, display_labels=dct.keys(),cmap=plt.cm.Blues)
+#     disp.ax_.set_title('Confusion Matrix' + str(net.__class__) + '\n SNR: 0dB')
+#     print('Confusion Matrix')
+#     print(disp.confusion_matrix)
+#     dirc = os.path.dirname(__file__)
+#     filename = os.path.join(dirc, 'Data', name+'.jpg')
+#     plt.savefig(filename, bbox_inches="tight")
+#     plt.show()
 
 
 def t_flow(raw_data, num_freqs, num_thetas):
+    settings_loc = r'C:\Users\tyler\PycharmProjects\gradProject\gradProject\Settings\Tensorflow_settings.xml'
+    tf_settings = load_tf_settings(settings_loc)
     train_set, test_set = train_test_split(raw_data, test_size=0.2, random_state=42)
     print("test set size:")
     print(len(test_set))
@@ -132,36 +135,37 @@ def t_flow(raw_data, num_freqs, num_thetas):
 
     x_train = np.asarray(x_train)
     y_train = np.asarray(y_train)
-    y_train = tf.keras.utils.to_categorical(y_train, num_classes=3)
+    y_train = tf.keras.utils.to_categorical(y_train, num_classes=4)
     x_test = np.asarray(x_test)
-    y_test = tf.keras.utils.to_categorical(y_test, num_classes=3)
-
-    #train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-    #test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-
-    BATCH_SIZE = 1
-    SHUFFLE_BUFFER_SIZE = 100
-
-    #train_dataset = train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
-    #test_dataset = test_dataset.batch(BATCH_SIZE)
-    #inshape=(1, num_thetas, num_freqs)
+    y_test = tf.keras.utils.to_categorical(y_test, num_classes=4)
 
     model = tf.keras.Sequential([
-        tf.keras.layers.Conv1D(32, 3, activation='relu', input_shape=(num_thetas, num_freqs)),
+        tf.keras.layers.Conv1D(32, 4, activation='relu', input_shape=(num_thetas, num_freqs)),
         tf.keras.layers.MaxPooling1D(pool_size=2, strides=2, padding='valid'),
         tf.keras.layers.Flatten(input_shape=(num_thetas, num_freqs)),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(3, activation='softmax')
+        tf.keras.layers.Dense(4, activation='softmax')
     ])
 
     model.compile(loss="categorical_crossentropy", optimizer="SGD", metrics=["accuracy"])
-
-    model.fit(x_train, y_train, epochs=30, batch_size=1)
+    model.summary()
+    model.fit(x_train, y_train, epochs=int(tf_settings['num_epochs']), batch_size=int(tf_settings['batch_size']))
     y_pred = model.predict(x_test)
-    print(tf.math.confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1), num_classes=3))
+    print(tf.math.confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1), num_classes=4))
 
     return model
+
+
+def load_tf_settings(file):
+    settings_dict = {}
+    t = ET.parse(file)
+    root = t.getroot()
+
+    for r in root:
+        settings_dict[r.tag] = r.text
+
+    return settings_dict
 
 
 def t_predict(model, raw_data):

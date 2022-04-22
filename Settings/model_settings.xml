@@ -1,0 +1,26 @@
+<settings>
+    <identifier>
+        <name>models_0_20db</name>
+        <date>03_22</date>
+        <dev>tyler</dev>
+    </identifier>
+    <scene>
+        <number_of_reflectors>3</number_of_reflectors>
+        <SNR_min>1000</SNR_min>
+        <SNR_max>1000</SNR_max>
+        <SNR_step>0</SNR_step>
+        <min_reflector_size>1</min_reflector_size>
+        <max_reflector_size>10</max_reflector_size>
+    </scene>
+    <sim_params>
+        <freq_min>1000000000</freq_min>
+        <freq_max>2000000000</freq_max>
+        <freq_step>10000000</freq_step>
+        <theta_min>-40</theta_min>
+        <theta_max>40</theta_max>
+        <theta_step>2</theta_step>
+    </sim_params>
+    <model_file>
+        <num_entries>20000</num_entries>
+    </model_file>
+</settings>

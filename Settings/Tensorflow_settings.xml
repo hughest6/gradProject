@@ -1,0 +1,4 @@
+<settings>
+    <num_epochs>100</num_epochs>
+    <batch_size>128</batch_size>
+</settings>
